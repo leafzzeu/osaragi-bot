@@ -80,6 +80,7 @@ const fetch = require("node-fetch");
 const path = require("path");
 const axios = require("axios");
 const chalk = require("chalk");
+const speed = require('performance-now');
 const crypto = require("crypto");
 const FormData = require("form-data");
 const cheerio = require("cheerio");
@@ -489,6 +490,15 @@ return `*[ ! ] Cara penggunaan salah!*\n> How To : ${cmd} ${teks}`
 │• get
 │• backup
 │• setpp
+┗┈─┄┈─┄─ᯓ
+
+┏┈─┄ *Tools Menu* ᯓ
+│• tourl
+│• ping
+│• sticker
+│• brat
+│• qc
+│• bratvid
 ┗┈─┄┈─┄─ᯓ
 
 ┏┈─┄ *Group Menu* ᯓ
@@ -962,6 +972,103 @@ case "tikslide": {
     }
 }
 break;
+
+//=================================================//
+
+case "tourl": {
+    try {
+        let q = m.quoted ? m.quoted : m;
+        let mime = (q.msg || q).mimetype || '';
+
+        // Memastikan MIME type valid untuk media
+        if (mime && (mime.startsWith('image/') || mime.startsWith('video/') || mime.startsWith('audio/'))) {
+            let media = await q.download();
+            if (media.length > 100 * 1024 * 1024) return reply('File size terlalu besar (Max 100MB)');
+           await reaction(m.chat, "🍁")
+           
+            let filename = `./tmp/${Date.now()}.${mime.split('/')[1]}`;
+            fs.writeFileSync(filename, media);
+
+            let formData = new FormData();
+            formData.append('file', fs.createReadStream(filename));
+            formData.append('expirationOption', 'permanent');
+
+            let res = await fetch('https://Nauval.mycdn.biz.id/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            let json = await res.json();
+            fs.unlinkSync(filename); // Hapus file setelah upload
+
+            if (json.success) {
+                await reply(`*File Upload to URL* 🗂️
+
+* *Link :* ${json.fileUrl}
+* *Expired :* Permanent`.trim(), m);
+            } else {
+                throw new Error('Upload gagal: ' + json.message);
+            }
+
+        } else {
+            return reply('Hanya mendukung pengunggahan media (gambar, video, audio).');
+        }
+
+    } catch (e) {
+        console.error(e);
+        await reply(`*ERROR:* ${e.message}`);
+    }
+}
+break;
+
+case "ping": {
+await reaction(m.chat, "💾")
+	const used = process.memoryUsage()
+                const cpus = os.cpus().map(cpu => {
+                    cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0)
+			        return cpu
+                })
+                const cpu = cpus.reduce((last, cpu, _, { length }) => {
+                    last.total += cpu.total
+                    last.speed += cpu.speed / length
+                    last.times.user += cpu.times.user
+                    last.times.nice += cpu.times.nice
+                    last.times.sys += cpu.times.sys
+                    last.times.idle += cpu.times.idle
+                    last.times.irq += cpu.times.irq
+                    return last
+                }, {
+                    speed: 0,
+                    total: 0,
+                    times: {
+			            user: 0,
+			            nice: 0,
+			            sys: 0,
+			            idle: 0,
+			            irq: 0
+                }
+                })
+                let timestamp = speed()
+                let latensi = speed() - timestamp
+              let  neww = performance.now()
+              let  oldd = performance.now()
+              
+               let respon = reply(`
+Response Speed ${latensi.toFixed(4)} _Second_ \n ${oldd - neww} _miliseconds_\n\nRuntime : ${runtime(process.uptime())}
+
+💻 Info Server
+RAM: ${formatp(os.totalmem() - os.freemem())} / ${formatp(os.totalmem())}
+
+_NodeJS Memory Usaage_
+${Object.keys(used).map((key, _, arr) => `${key.padEnd(Math.max(...arr.map(v=>v.length)),' ')}: ${formatp(used[key])}`).join('\n')}
+
+${cpus[0] ? `_Total CPU Usage_
+${cpus[0].model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `- *${(type + '*').padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}
+_CPU Core(s) Usage (${cpus.length} Core CPU)_
+${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `- *${(type + '*').padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}`).join('\n\n')}` : ''}
+                `.trim())
+    }
+	break
             default:
                 if (budy.startsWith("$")) {
                     if (!isCreator) return m.reply(mess.owner);
