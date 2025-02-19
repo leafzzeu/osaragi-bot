@@ -1,17 +1,16 @@
 {
-  "name": "Lilychanj-New",
+  "name": "Osaragi-Bot",
   "version": "1.0.0",
   "description": "Base WhatsApp Bot By TanakaDomp ",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
-  "author": "TanakaDomp",
+  "author": "Leaf3u",
   "license": "MIT",
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@hapi/boom": "^10.0.1",
-    "@vitalets/google-translate-api": "^9.2.0",
     "@whiskeysockets/baileys": "github:kangfarrel/felzar-Baileys",
     "awesome-phonenumber": "^2.64.0",
     "axios": "^1.7.7",
@@ -41,8 +40,6 @@
     "performance-now": "^2.1.0",
     "pino": "^7.0.5",
     "request": "^2.88.2",
-    "similarity": "^1.2.1",
-    "string-similarity": "^4.0.4",
     "util": "^0.12.5",
     "yargs": "^17.7.2"
   }
