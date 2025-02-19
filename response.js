@@ -1069,6 +1069,144 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                 `.trim())
     }
 	break
+	
+case 'sticker':
+case 'stiker':
+case 's': {
+    if (!quoted) return reply(example("kirim gambar/video"));
+await reaction(m.chat, "🎐")
+    if (/image/.test(mime)) {
+        let media = await quoted.download();
+        let encmedia = await leap.sendImageAsSticker(m.chat, media, m, {
+            packname: global.packname,
+            author: global.author
+        });
+        await fs.unlinkSync(encmedia);
+    } else if (/video/.test(mime)) {
+        if ((quoted.msg || quoted).seconds > 11) return reply('Maksimal 10 detik!');
+        let media = await quoted.download();
+        let encmedia = await leap.sendVideoAsSticker(m.chat, media, m, {
+            packname: global.packname,
+            author: global.author
+        });
+        await fs.unlinkSync(encmedia);
+    } else {
+        return reply(example("kirim gambar/video"));
+    }
+}
+break 
+
+case "qc": {
+    const { quote } = require('./App/scraper/quote.js');
+    let text;
+
+    if (args.length >= 1) {
+        text = args.slice(0).join(" ");
+    } else if (m.quoted && m.quoted.text) {
+        text = m.quoted.text;
+    } else {
+        return reply(example("nasukkan text"));
+    }
+
+    if (!text) return reply(example('masukan text'));
+    if (text.length > 200) return reply("maksimal 200 teks!")
+
+    let ppnyauser = await leap.profilePictureUrl(m.sender, 'image').catch(_ => 'https://files.catbox.moe/nwvkbt.png');
+    await reaction(m.chat, "🎐")
+    const rest = await quote(text, pushname, ppnyauser);
+    leap.sendImageAsSticker(m.chat, rest.result, m, {
+        packname: `${global.packname}`,
+        author: `${global.author}`
+    });
+}
+break
+
+case 'brat': {
+    let text;
+
+    if (args.length >= 1) {
+        text = args.slice(0).join(" ");
+    } else if (m.quoted && m.quoted.text) {
+        text = m.quoted.text;
+    } else {
+        return reply(example("teksnya"));
+    }
+
+    if (!text) {
+        return reply(example("berikan teksnya"))
+    }
+await reaction(m.chat, "🎐")
+    let ngawiStik = await getBuffer(`https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(text)}`);
+    await leap.sendImageAsSticker(m.chat, ngawiStik, m, {
+        packname: global.packname,
+        author: global.author
+    });
+}
+break;
+
+case 'bratvid':
+case 'bratvidio':
+case 'bratvideo': {
+  if (!text) return reply(example("hai halo"))
+  await reaction(m.chat, "🎐")
+  if (text.length > 250) return reply(`Karakter terbatas, max 250!`)
+
+  const words = text.split(" ")
+  const tempDir = path.join(process.cwd(), 'lib')
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir)
+  const framePaths = []
+
+  try {
+    for (let i = 0; i < words.length; i++) {
+      const currentText = words.slice(0, i + 1).join(" ")
+
+      const res = await axios.get(
+        `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(currentText)}`,
+        { responseType: "arraybuffer" }
+      ).catch((e) => e.response)
+
+      const framePath = path.join(tempDir, `frame${i}.mp4`)
+      fs.writeFileSync(framePath, res.data)
+      framePaths.push(framePath)
+    }
+
+    const fileListPath = path.join(tempDir, "filelist.txt")
+    let fileListContent = ""
+
+    for (let i = 0; i < framePaths.length; i++) {
+      fileListContent += `file '${framePaths[i]}'\n`
+      fileListContent += `duration 0.7\n`
+    }
+
+    fileListContent += `file '${framePaths[framePaths.length - 1]}'\n`
+    fileListContent += `duration 2\n`
+
+    fs.writeFileSync(fileListPath, fileListContent)
+    const outputVideoPath = path.join(tempDir, "output.mp4")
+    execSync(
+      `ffmpeg -y -f concat -safe 0 -i ${fileListPath} -vf "fps=30" -c:v libx264 -preset ultrafast -pix_fmt yuv420p ${outputVideoPath}`
+    )
+
+    await leap.sendImageAsSticker(m.chat, outputVideoPath, m, {
+      packname: global.packname,
+      author: global.author
+    })
+
+    framePaths.forEach((frame) => {
+      if (fs.existsSync(frame)) fs.unlinkSync(frame)
+    })
+    if (fs.existsSync(fileListPath)) fs.unlinkSync(fileListPath)
+    if (fs.existsSync(outputVideoPath)) fs.unlinkSync(outputVideoPath)
+  } catch (err) {
+    console.error(err)
+    reply('Terjadi kesalahan')
+  }
+}
+break
+
+//=================================================//
+
+
             default:
                 if (budy.startsWith("$")) {
                     if (!isCreator) return m.reply(mess.owner);
