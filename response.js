@@ -469,19 +469,17 @@ return `*[ ! ] Cara penggunaan salah!*\n> How To : ${cmd} ${teks}`
 
                     let menyiw = `Helo *${pushname}* my name is *${botname}*, this is my Dashboard View
 
-* *Bot Info*
-> uptime : ${runtime(os.uptime())}
-> runtime : ${runtime(process.uptime())}
-> botname : ${global.botname}
-> mode : ${leap.public ? "Public" : "Self"}
-> version : ${global.version}
+─ *Bot Info*
+> *Uptime :* ${runtime(os.uptime())}
+> *Runtime :* ${runtime(process.uptime())}
+> *Status :* ${leap.public ? "Public" : "Self"}
 
-* *User Info*
-> name : ${pushname}
-> number : ${senderNumber}
-> owner? ${isCreator ? "Yes" : "No"}
+─ *User Info*
+> *Name :* ${pushname}
+> *Number :* ${senderNumber}
+> *Role :* ${isCreator ? "Owner" : "User"}
 
-> *developed by : leaf3u* ${more}
+─ *Developed By : \`leaf3u\`* ${more}
 
 ┏┈─┄ *Owner Menu* ᯓ
 │• self
