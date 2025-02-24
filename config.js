@@ -2,7 +2,8 @@ const fs = require('fs')
 const chalk = require('chalk')
 
 //====== [ SETTING PAIRING & TOKEN ] ========//
-global.pairing = '6285792164786'
+global.pairing = '6283125380395'
+global.custpair = "OSARAGII"
 
 //====== [ SETTING OWNER  ] ========//
 global.owner = [ "6287858976852" ]
@@ -12,7 +13,7 @@ global.ownername = "leaf3u"
 
 //====== [ SETTING BOT ] ========//
 global.botname = '─osaragi'
-global.botnumber = '6285792164786'
+global.botnumber = ' 6283125380395'
 global.version = '1.0.0'
 global.prefa = ['/','!','.','#','&']
 

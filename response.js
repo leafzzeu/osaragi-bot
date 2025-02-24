@@ -86,8 +86,11 @@ const FormData = require("form-data");
 const cheerio = require("cheerio");
 const Jimp = require("jimp")
 const os = require("os");
+const ytdl = require ('ytdl-core')
+const yts = require('yt-search')
 const moment = require("moment-timezone");
 const { addExif } = require("./App/function/exif");
+
 const {
     smsg,
     formatDate,
@@ -140,7 +143,10 @@ const {
     checkPremiumUser,
     getAllPremiumUser
 } = require("./App/function/premiun");
-let premium = JSON.parse(fs.readFileSync("./Storage/premium.json"));
+
+        // DATABASE STORAGE LOKAL.JSON
+        let premium = JSON.parse(fs.readFileSync("./Storage/premium.json"));
+        
 module.exports = leap = async (leap, m, chatUpdate, store) => {
     try {
         const body =
@@ -187,7 +193,7 @@ module.exports = leap = async (leap, m, chatUpdate, store) => {
         const botNumber = await leap.decodeJid(leap.user.id);
         const { type, fromMe } = m;
         const sender = m.sender;
-        const senderNumber = sender.split("@")[0];
+        const senderNumber = leap.decodeJid(m.sender).split`@`[0]
         const isCreator =
             (m &&
                 m.sender &&
@@ -379,6 +385,8 @@ async function fetchBuffer(url) {
                 }
             });
         };
+        
+        const fpay = {key: {remoteJid: '0@s.whatsapp.net', fromMe: false, id: ownername, participant: '0@s.whatsapp.net'}, message: {requestPaymentMessage: {currencyCodeIso4217: "IDR", amount1000: 999999999, requestFrom: '0@s.whatsapp.net', noteMessage: { extendedTextMessage: { text: "Osaragi by leaf3u"}}, expiryTimestamp: 999999999, amount: {value: 91929291929, offset: 1000, currencyCode: "IDR"}}}}
 
         const kia = {
             key: {
@@ -427,7 +435,7 @@ async function fetchBuffer(url) {
 
 
 let example = (teks) => {
-return `*[ ! ] Cara penggunaan salah!*\n> How To : ${cmd} ${teks}`
+return `*[ ! ] Cara penggunaan salah!*\n> \`${cmd} ${teks}\``
 }
         //================== [ CONSOL LOGG] ==================//
         if (m.message) {
@@ -476,46 +484,66 @@ return `*[ ! ] Cara penggunaan salah!*\n> How To : ${cmd} ${teks}`
 
 ─ *User Info*
 > *Name :* ${pushname}
-> *Number :* ${senderNumber}
+> *Number :* @${senderNumber}
 > *Role :* ${isCreator ? "Owner" : "User"}
 
-─ *Developed By : \`leaf3u\`* ${more}
+─ *Developed By : \`leaf3u\`*
 
-┏┈─┄ *Owner Menu* ᯓ
-│• self
-│• public
-│• upch
-│• get
-│• backup
-│• setpp
-┗┈─┄┈─┄─ᯓ
+\`─ [ Owner Menu ] ─\`
+› self
+› public
+› upch
+› get
+› backup
+› setpp
 
-┏┈─┄ *Tools Menu* ᯓ
-│• tourl
-│• ping
-│• sticker
-│• brat
-│• qc
-│• bratvid
-┗┈─┄┈─┄─ᯓ
+────────────────
 
-┏┈─┄ *Group Menu* ᯓ
-│• hidetag - [h, totag]
-│• tagall - [everyone]
-│• kick - [kik, dor, tendang]
-│• promote
-│• demote
-┗┈─┄┈─┄─ᯓ
+\`─ [ Tools Menu ] ─\`
+› tourl
+› ping
+› sticker
+› brat
+› qc
+› bratvid
 
-┏┈─┄ *Downloader Menu* ᯓ
-│• tiktok
-│• tikslide
-│• instagram
-┗┈─┄┈─┄─ᯓ
+────────────────
+
+\`─ [ Group Menu ] ─\`
+› hidetag 
+› tagall 
+› kick
+› promote
+› demote
+
+────────────────
+
+\`─ [ Downloader Menu ] ─\`
+› tiktok
+› tikslide
+› instagram
+› spotify
+
+────────────────
+
+\`─ [ Store Menu ] ─\`
+› done
+› proses
+› bagi
+› kali
+› kurang
+› tambah
+› addlist
+› addstok
+› dellist
+› delstok
+› updatelist
+› list
+› payment
 `;
                     leap.sendMessage(
-                        m.chat, { image: { url: global.thumbnail },
-                            caption: menyiw,
+                        m.chat, { 
+                            text: menyiw,
                             contextInfo: {
                                 forwardingScore: 999,
                                 isForwarded: true,
@@ -527,7 +555,7 @@ return `*[ ! ] Cara penggunaan salah!*\n> How To : ${cmd} ${teks}`
                                 externalAdReply: {
                                     title: global.botname,
                                     body: `${lilydate}`,
-                                    thumbnail: ppnyauser,
+                                    thumbnailUrl: thumbnail,
                                     sourceUrl:
                                         "https://github.com/TanakaDomp/Lilychanj-Script",
                                     mediaType: 1,
@@ -971,6 +999,40 @@ case "tikslide": {
 }
 break;
 
+case "spotifydl":
+case "spotify":
+case "spdl": {
+    if (!text) return reply(example(`url Spotifynya`));
+    await reaction(m.chat, "🎶");
+    await reply(mess.wait);
+    
+    await fetch(`https://api.siputzx.my.id/api/d/spotify?url=${text}`).then(async (res) => {
+        const response = await res.json();
+        
+        if (response.status) {
+            const album = response.data;
+            const title = album.title;
+            const artist = album.artis;
+            const duration = album.durasi; 
+            const image = album.image;
+            const downloadLink = album.download;
+
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+
+            const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+
+            let message = `*Album:* ${title}\n*Artis:* ${artist}\n*Durasi:* ${minutes} menit ${formattedSeconds} detik\n*Download:* ${downloadLink}`;
+            await leap.sendMessage(m.chat, { image: { url: image }, caption: message }, { quoted: m });
+
+            await leap.sendMessage(m.chat, { audio: { url: downloadLink }, mimetype: 'audio/mpeg', ptt: false }, { quoted: m });
+        } else {
+            reply('Album tidak ditemukan atau terjadi kesalahan.');
+        }
+    }).catch(err => reply('Error 🗿'));
+}
+break
+
 //=================================================//
 
 case "tourl": {
@@ -1020,54 +1082,20 @@ case "tourl": {
 break;
 
 case "ping": {
+let timestamp = speed();
+let latensi = speed() - timestamp;
 await reaction(m.chat, "💾")
-	const used = process.memoryUsage()
-                const cpus = os.cpus().map(cpu => {
-                    cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0)
-			        return cpu
-                })
-                const cpu = cpus.reduce((last, cpu, _, { length }) => {
-                    last.total += cpu.total
-                    last.speed += cpu.speed / length
-                    last.times.user += cpu.times.user
-                    last.times.nice += cpu.times.nice
-                    last.times.sys += cpu.times.sys
-                    last.times.idle += cpu.times.idle
-                    last.times.irq += cpu.times.irq
-                    return last
-                }, {
-                    speed: 0,
-                    total: 0,
-                    times: {
-			            user: 0,
-			            nice: 0,
-			            sys: 0,
-			            idle: 0,
-			            irq: 0
-                }
-                })
-                let timestamp = speed()
-                let latensi = speed() - timestamp
-              let  neww = performance.now()
-              let  oldd = performance.now()
-              
-               let respon = reply(`
-Response Speed ${latensi.toFixed(4)} _Second_ \n ${oldd - neww} _miliseconds_\n\nRuntime : ${runtime(process.uptime())}
+exec(`neofetch --stdout`, (error, stdout, stderr, json) => {
+          let child = stdout.toString("utf-8");
+          let ssd =
+ child.replace(/Memory:/, "Ram:");
 
-💻 Info Server
-RAM: ${formatp(os.totalmem() - os.freemem())} / ${formatp(os.totalmem())}
-
-_NodeJS Memory Usaage_
-${Object.keys(used).map((key, _, arr) => `${key.padEnd(Math.max(...arr.map(v=>v.length)),' ')}: ${formatp(used[key])}`).join('\n')}
-
-${cpus[0] ? `_Total CPU Usage_
-${cpus[0].model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `- *${(type + '*').padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}
-_CPU Core(s) Usage (${cpus.length} Core CPU)_
-${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `- *${(type + '*').padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}`).join('\n\n')}` : ''}
-                `.trim())
-    }
-	break
-	
+const teknya = `• *CPU:* ${ssd}*Kecepatan* : ${latensi.toFixed(4)} _ms_\n• *Memory:* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(os.totalmem / 1024 / 1024)}MB\n• *OS:* ${os.version()}\n• *Platform:* ${os.platform()}\n• *Hostname:* ${os.hostname()}`
+reply(teknya)
+}
+)}
+break
+            
 case 'sticker':
 case 'stiker':
 case 's': {
@@ -1204,6 +1232,114 @@ break
 
 //=================================================//
 
+case "tambah": {
+	if (!text.includes('+')) return reply(example("1+2"))
+arg = args.join(' ')
+atas = arg.split('+')[0]
+bawah = arg.split('+')[1]
+            var nilai_one = Number(atas)
+            var nilai_two = Number(bawah)
+            reply(`${nilai_one + nilai_two}`)}
+            break
+            
+        case "kurang":{
+            if (!text.includes('-')) return reply(example("1-2"))
+arg = args.join(' ')
+atas = arg.split('-')[0]
+bawah = arg.split('-')[1]
+            var nilai_one = Number(atas)
+            var nilai_two = Number(bawah)
+            reply(`${nilai_one - nilai_two}`)}
+            break
+            
+        case "kali":{
+            if (!text.includes('*')) return reply(example("1*2"))
+arg = args.join(' ')
+atas = arg.split('*')[0]
+bawah = arg.split('*')[1]
+            var nilai_one = Number(atas)
+            var nilai_two = Number(bawah)
+            reply(`${nilai_one * nilai_two}`)}
+            break
+            
+        case "bagi":{
+            if (!text.includes('/')) return reply(example("1/2"))
+arg = args.join(' ')
+atas = arg.split('/')[0]
+bawah = arg.split('/')[1]
+            var nilai_one = Number(atas)
+            var nilai_two = Number(bawah)
+            reply(`${nilai_one / nilai_two}`)}
+            break
+
+case "done": {
+    if (!isCreator) return reply(mess.owner);
+    if (!q) return reply(example("done Panel 5000"));
+
+    const parts = q.split(' '); 
+    const product = parts.slice(0, -1).join(' ');
+    const price = parts[parts.length - 1];
+
+    if (!product || !price) {
+        return reply("Format input salah. Harap gunakan format: done [nama produk] [harga]");
+    }
+
+    const formattedPrice = `Rp${parseInt(price).toLocaleString('id-ID')}`;
+
+    let teks = `*\`TRANSAKSI BERHASIL 💸\`*
+    
+* *Produk : ${product}*
+* *Harga : ${formattedPrice}*
+* *Status : Berhasil✅*
+* *Tanggal : ${hariini}*
+
+> _Terimakasih telah membeli produk saya:D_
+`;
+
+    leap.relayMessage(m.chat,  {
+        requestPaymentMessage: {
+          currencyCodeIso4217: 'IDR',
+          amount1000: 100000000000,
+          requestFrom: m.sender,
+          noteMessage: {
+          extendedTextMessage: {
+          text: teks,
+          contextInfo: {
+          externalAdReply: {
+          showAdAttribution: true
+          }}}}}}, { quoted: m })
+}
+break;
+
+case "proses": {
+    if (!isCreator) return reply(mess.owner);
+    
+    // Memastikan ada pesan yang dikutip
+    if (!m.quoted) return reply("Silakan kutip pesan untuk memproses pesanan.");
+
+    // Mengambil nama pengirim dari pesan yang dikutip
+    const quotedSender = leap.decodeJid(m.chat).split`@`[0]
+
+    // Membuat pesan untuk menampilkan bahwa pesanan sedang diproses
+    const teks = `\`TRANSAKSI DIPROSES 💸\`
+    
+* *Dari : @${quotedSender}*
+* *Status : Proses⌛*
+    
+> _Tunggu sebentar ya..._`;
+
+    // Mengirimkan pesan ke chat
+    leap.sendMessage(m.chat, { text: teks, 
+    contextInfo: {
+      externalAdReply: {
+        title: "Pesanan di-Proses📥",
+        thumbnailUrl: global.icon,
+        sourceUrl: "https://github.com/leafzzeu/osaragi-bot",
+        renderLargerThumbnail: false,
+        showAdAttribution: true
+        }}}, { quoted: m })
+}
+break;
 
             default:
                 if (budy.startsWith("$")) {
